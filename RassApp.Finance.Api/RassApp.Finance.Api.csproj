@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
+    <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RassApp.Finance.Application\RassApp.Finance.Application.csproj" />
+    <ProjectReference Include="..\RassApp.Finance.Infrastructure\RassApp.Finance.Infrastructure.csproj" />
+    <ProjectReference Include="..\RassApp.Security\RassApp.Security.csproj" />
+    <ProjectReference Include="..\RassApp.MultiTenancy\RassApp.MultiTenancy.csproj" />
+    <ProjectReference Include="..\RassApp.Synchronization\RassApp.Synchronization.csproj" />
+  </ItemGroup>
+
+</Project>

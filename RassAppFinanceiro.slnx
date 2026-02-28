@@ -1,0 +1,15 @@
+<Solution>
+  <Project Path="RassApp.ApiGateway/RassApp.ApiGateway.csproj" />
+  <Project Path="RassApp.EventBus/RassApp.EventBus.csproj" />
+  <Project Path="RassApp.Finance.Api/RassApp.Finance.Api.csproj" />
+  <Project Path="RassApp.Finance.Application/RassApp.Finance.Application.csproj" />
+  <Project Path="RassApp.Finance.Domain/RassApp.Finance.Domain.csproj" />
+  <Project Path="RassApp.Finance.Infrastructure/RassApp.Finance.Infrastructure.csproj" />
+  <Project Path="RassApp.Infrastructure/RassApp.Infrastructure.csproj" />
+  <Project Path="RassApp.Mobile/RassApp.Mobile.csproj" />
+  <Project Path="RassApp.MultiTenancy/RassApp.MultiTenancy.csproj" />
+  <Project Path="RassApp.Security/RassApp.Security.csproj" />
+  <Project Path="RassApp.SharedKernel/RassApp.SharedKernel.csproj" />
+  <Project Path="RassApp.Synchronization/RassApp.Synchronization.csproj" />
+  <Project Path="RassApp.Web/RassApp.Web.csproj" />
+</Solution>
