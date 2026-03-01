@@ -1,72 +1,78 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using RassApp.Finance.Domain.Common;
 using RassApp.Finance.Domain.Entities;
 using RassApp.MultiTenancy.Contexts;
-using RassApp.Finance.Application.Abstractions;
+using System.Linq.Expressions;
 using System.Reflection;
-
-namespace RassApp.Finance.Infrastructure.Persistence;
+using RassApp.SharedKernel.Abstractions.Persistence;
 
 public class FinanceDbContext : DbContext, IUnitOfWork
 {
     private readonly ITenantContext _tenantContext;
-
-    // ✅ Propriedade usada pelo EF no filtro global
-    public string TenantId => _tenantContext.TenantId;
 
     public FinanceDbContext(
         DbContextOptions<FinanceDbContext> options,
         ITenantContext tenantContext)
         : base(options)
     {
-        _tenantContext = tenantContext;
+        _tenantContext = tenantContext
+            ?? throw new ArgumentNullException(nameof(tenantContext));
     }
+
+    private string CurrentTenantId => _tenantContext.TenantId;
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Account> Accounts => Set<Account>();
-    public DbSet<Transaction> Transactions => Set<Transaction>();
-    public DbSet<Category> Categories => Set<Category>(); // ⚠ importante se estiver usando
-
-    private void SetGlobalQueryFilter<TEntity>(ModelBuilder builder)
-        where TEntity : BaseEntity
-    {
-        builder.Entity<TEntity>()
-            .HasQueryFilter(e =>
-                !e.IsDeleted &&
-                e.TenantId == TenantId);
-    }
+    public DbSet<Category> Categories => Set<Category>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(FinanceDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+            .Where(et => typeof(BaseEntity).IsAssignableFrom(et.ClrType)))
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                var method = typeof(FinanceDbContext)
-                    .GetMethod(nameof(SetGlobalQueryFilter),
-                        BindingFlags.NonPublic | BindingFlags.Instance)!
-                    .MakeGenericMethod(entityType.ClrType);
+            var parameter = Expression.Parameter(entityType.ClrType, "e");
 
-                method.Invoke(this, new object[] { modelBuilder });
-            }
+            var isDeletedProperty = Expression.Call(
+                typeof(EF),
+                nameof(EF.Property),
+                new[] { typeof(bool) },
+                parameter,
+                Expression.Constant(nameof(BaseEntity.IsDeleted)));
+
+            var tenantProperty = Expression.Call(
+                typeof(EF),
+                nameof(EF.Property),
+                new[] { typeof(string) },
+                parameter,
+                Expression.Constant(nameof(BaseEntity.TenantId)));
+
+            var isDeletedCondition = Expression.Equal(isDeletedProperty, Expression.Constant(false));
+            var tenantCondition = Expression.Equal(tenantProperty, Expression.Constant(CurrentTenantId));
+
+            var combined = Expression.AndAlso(isDeletedCondition, tenantCondition);
+
+            var lambda = Expression.Lambda(combined, parameter);
+
+            modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
         }
     }
 
-    public override async Task<int> SaveChangesAsync(
-        CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
+        var tenantId = CurrentTenantId;
+
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
             switch (entry.State)
             {
                 case EntityState.Added:
                     entry.Entity.SetCreated();
-                    entry.Entity.SetTenant(TenantId);
+                    entry.Entity.SetTenant(tenantId);
                     break;
 
                 case EntityState.Modified:
@@ -74,12 +80,12 @@ public class FinanceDbContext : DbContext, IUnitOfWork
                     break;
 
                 case EntityState.Deleted:
-                    entry.State = EntityState.Modified;
                     entry.Entity.MarkAsDeleted();
+                    entry.State = EntityState.Modified;
                     break;
             }
         }
 
-        return await base.SaveChangesAsync(cancellationToken);
+        return await base.SaveChangesAsync(ct);
     }
 }

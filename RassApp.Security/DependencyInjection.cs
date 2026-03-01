@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using RassApp.Security.Interfaces;
+using RassApp.Security.Abstractions;
 using RassApp.Security.Services;
 using System.Text;
 

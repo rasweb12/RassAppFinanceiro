@@ -4,7 +4,10 @@ using RassApp.Finance.Application.Common.Result;
 using RassApp.Finance.Application.Features.Auth.Commands;
 using RassApp.Finance.Application.Features.Auth.DTOs;
 using RassApp.Finance.Domain.Entities;
+using RassApp.Security.Abstractions;
 using RassApp.Security.Models;
+using RassApp.Security.Services;
+using RassApp.SharedKernel.Abstractions.Persistence;
 
 
 namespace RassApp.Finance.Application.Features.Auth.Handlers;

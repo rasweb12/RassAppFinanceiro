@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RassApp.Finance.Application.Abstractions;
 using RassApp.Finance.Domain.Entities;
+using RassApp.SharedKernel.Abstractions.Persistence;
 
 namespace RassApp.Finance.Infrastructure.Persistence.Repositories;
 

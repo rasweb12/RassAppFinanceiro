@@ -1,6 +1,6 @@
 ﻿using RassApp.Security.Models;
 
-namespace RassApp.Security.Interfaces;
+namespace RassApp.Security.Abstractions;
 
 public interface IJwtService
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using RassApp.Security.Interfaces;
+using RassApp.Security.Abstractions;
 using RassApp.Security.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,17 +20,22 @@ public class JwtService : IJwtService
 
     public string GenerateAccessToken(JwtUser user)
     {
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));
+        var secret = _config["Jwt:Secret"]
+            ?? throw new InvalidOperationException("JWT Secret not configured");
 
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(secret));
+
+        var creds = new SigningCredentials(
+            key,
+            SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role),
-            new Claim("tenant", user.TenantId)
+            new Claim("tenant_id", user.TenantId)
         };
 
         var token = new JwtSecurityToken(
@@ -44,5 +49,6 @@ public class JwtService : IJwtService
     }
 
     public string GenerateRefreshToken()
-        => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        => Convert.ToBase64String(
+            RandomNumberGenerator.GetBytes(64));
 }

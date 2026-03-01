@@ -2,8 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RassApp.Finance.Application.Abstractions;
-using RassApp.Finance.Infrastructure.Persistence;
 using RassApp.Finance.Infrastructure.Persistence.Repositories;
+using RassApp.Security.Abstractions;
+using RassApp.Security.Services;
+using RassApp.SharedKernel.Abstractions.Persistence;
 
 namespace RassApp.Finance.Infrastructure;
 
@@ -15,17 +17,18 @@ public static class DependencyInjection
     {
         services.AddDbContext<FinanceDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("Default")));
+                configuration.GetConnectionString("DefaultConnection")));
 
-        // DbContext como UnitOfWork
+        // Unit of Work
         services.AddScoped<IUnitOfWork>(sp =>
             sp.GetRequiredService<FinanceDbContext>());
 
-        // Repository genérico
+        // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
-        // Repositories específicos
         services.AddScoped<IUserRepository, UserRepository>();
+
+        // JWT
+        services.AddScoped<IJwtService, JwtService>();
 
         return services;
     }

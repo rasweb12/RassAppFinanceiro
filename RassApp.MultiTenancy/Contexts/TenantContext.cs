@@ -1,6 +1,4 @@
-﻿using RassApp.MultiTenancy.Contexts;
-
-namespace RassApp.MultiTenancy.Contexts;
+﻿namespace RassApp.MultiTenancy.Contexts;
 
 public class TenantContext : ITenantContext
 {

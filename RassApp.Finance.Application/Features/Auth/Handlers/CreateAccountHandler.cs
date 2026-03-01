@@ -1,7 +1,8 @@
 ﻿using MediatR;
-using RassApp.Finance.Application.Abstractions;
+using RassApp.SharedKernel.Abstractions.Persistence;
 using RassApp.Finance.Domain.Entities;
 using RassApp.SharedKernel.Common.Results;
+using RassApp.Finance.Application.Abstractions;
 
 namespace RassApp.Finance.Application.Features.Accounts.CreateAccount;
 
